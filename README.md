@@ -1,70 +1,144 @@
-# Getting Started with Create React App
+# 🚗 GoRentCars – React Application CI/CD Pipeline with Jenkins, SonarQube & Docker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository demonstrates a **complete CI/CD pipeline** for the **GoRentCars car rental web application**, built using **React.js** and deployed using **Jenkins, SonarQube, Docker, and AWS EC2**.
 
-## Available Scripts
+Every code commit triggers **automated build, code quality analysis, Docker image creation, and deployment**, following real-world DevOps best practices.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🏗️ Architecture Overview
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+Developer → GitHub → Jenkins → SonarQube → Docker → AWS EC2 → Browser
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🔁 CI/CD Workflow
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Developer pushes code to GitHub  
+2. Jenkins automatically pulls the latest source code  
+3. SonarQube performs static code quality analysis  
+4. React application is built (`npm run build`)  
+5. Docker image is created using Nginx  
+6. Container is deployed on AWS EC2  
+7. Users access the live car rental website  
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🧰 Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| Category | Tool / Technology |
+|--------|------------------|
+| Frontend | React.js |
+| Package Manager | npm |
+| Version Control | GitHub |
+| CI/CD | Jenkins |
+| Code Quality | SonarQube |
+| Containerization | Docker |
+| Web Server | Nginx (Alpine) |
+| Cloud Platform | AWS EC2 (Ubuntu) |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🗂️ Project Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+go_rent_cars/
+│
+├── Dockerfile
+├── .dockerignore
+├── Jenkinsfile
+├── package.json
+├── package-lock.json
+│
+├── public/
+├── src/
+│
+└── README.md
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🐳 Dockerfile (React Production Build)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```dockerfile
+# Build Stage
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
 
-## Learn More
+# Production Stage
+FROM nginx:alpine
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🧪 SonarQube Code Analysis
 
-### Code Splitting
+✔ Quality Gate: PASSED  
+✔ No critical bugs  
+✔ No security vulnerabilities  
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Project Key: `GoRentCars-React`
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## ⚙️ Jenkins Deployment Commands
 
-### Making a Progressive Web App
+```bash
+npm install
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+scp -r ./* ubuntu@<DOCKER_EC2_IP>:~/go_rent_cars/
+```
 
-### Advanced Configuration
+```bash
+cd go_rent_cars
+docker build -t go_rent_cars_app .
+docker stop go_rent_cars || true
+docker rm go_rent_cars || true
+docker run -d -p 8090:80 --name go_rent_cars go_rent_cars_app
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🌐 Access the Application
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```
+http://<AWS_EC2_PUBLIC_IP>:8090
+```
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🔐 AWS Security Group Ports
+
+| Service | Port |
+|-------|------|
+| Jenkins | 8080 |
+| SonarQube | 9000 |
+| React App | 8090 |
+| SSH | 22 |
+
+---
+
+## 📌 Key Learnings
+
+- CI/CD automation for React applications  
+- SonarQube quality enforcement  
+- Dockerized production deployments  
+- Jenkins-based DevOps workflow  
+
+---
+
+### 👨‍💻 Author
+**Sanket Sangmiskar**
